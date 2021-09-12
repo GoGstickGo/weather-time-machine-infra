@@ -1,0 +1,12 @@
+---
+Method: 2
+Region: "ams"
+SSH:
+  Name: "wtm-01-key"
+Network:
+  Description: "Private network for wtm"
+Instance:
+  Plan: "vc2-1c-4gb"
+  Label: "wtm-01"
+  Hostname:  "wtm-01"
+  OS: 445
