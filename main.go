@@ -85,7 +85,7 @@ func main() {
 		}
 		if len(sSHName) == 0 {
 			fmt.Print("There is no SSH key to delete. \n")
-			fmt.Print("Contuine to delete private network.... \n")
+			fmt.Print("Continue to delete private network.... \n")
 		} else if sSHName != i.SSH.Name {
 			log.Fatalf("SSH mismatch, existing SSH key: %s, proposed SSH key for deletion: %s.\n", sSHName, i.SSH.Name)
 		} else {
@@ -102,7 +102,7 @@ func main() {
 		}
 		subnetMask := fmt.Sprintf("%d", networkSubnetMask)
 		if len(networkSubnet) == 0 {
-			log.Fatal("There is no Private Network to delete.")
+			fmt.Print("There is no Private Network to delete.\n")
 		} else if networkSubnet != os.Getenv("WTM_SUBNET") && subnetMask != os.Getenv("WTM_SUBNET_MASK") {
 			log.Fatalf("PrivateNetwork mismatch, existing PrivateNetwork: %s,proposed PrivateNetwork for deletion: %s.\n", networkSubnet, os.Getenv("WTM_SUBNET"))
 		} else {
@@ -112,5 +112,21 @@ func main() {
 			}
 			fmt.Printf("Private Network deleted, ID: %s, Subnet: %s\n", networkID, networkSubnet)
 		}
+		instanceID, instanceTag, err := methods.ListInstance(vultrClient)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if len(instanceTag) == 0 {
+			log.Fatalf("There is no Instance with the define tag: %s", instanceTag)
+		} else if instanceTag != i.Instance.Tag {
+			log.Fatalf("Instance mismatch, existing Instance: %s,proposed Instance for deletion :%s.\n", i.Instance.Tag, instanceTag)
+		} else {
+			err = methods.DeleteInstance(vultrClient, instanceID)
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Printf("Instance deleted, ID: %s ,Tag %s\n", instanceID, instanceTag)
+		}
+
 	}
 }

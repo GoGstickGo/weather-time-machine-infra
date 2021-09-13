@@ -50,6 +50,7 @@ func CreateInstance(vultrClient *govultr.Client, i Infra, networkID, sshID strin
 		OsID:                 i.Instance.OSId,
 		AttachPrivateNetwork: []string{networkID},
 		SSHKeys:              []string{sshID},
+		Tag:                  i.Instance.Tag,
 	}
 	resInstance, err = vultrClient.Instance.Create(context.Background(), instanceOptions)
 

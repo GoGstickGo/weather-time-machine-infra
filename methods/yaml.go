@@ -19,6 +19,7 @@ type InstanceConf struct {
 	Label    string
 	OSId     int
 	Plan     string
+	Tag      string
 }
 
 type NetworkConf struct {
