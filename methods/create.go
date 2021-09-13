@@ -3,27 +3,16 @@ package methods
 import (
 	"context"
 	"fmt"
+	"os"
+	"strconv"
 
 	"github.com/vultr/govultr/v2"
 )
 
-type Input struct {
-	SshName            string
-	SshPubKey          string
-	Region             string
-	NetworkDescription string
-	NetworkSubnet      string
-	NetworkSubnetMask  int
-	InstanceLabel      string
-	InstanceHostname   string
-	InstancePlan       string
-	InstanceOSId       int
-}
-
-func CreateSSH(vultrClient *govultr.Client, i Input) (resSSH *govultr.SSHKey, err error) {
+func CreateSSH(vultrClient *govultr.Client, i Infra) (resSSH *govultr.SSHKey, err error) {
 	sshkey := &govultr.SSHKeyReq{
-		Name:   i.SshName,
-		SSHKey: i.SshPubKey,
+		Name:   i.SSH.Name,
+		SSHKey: os.Getenv("WTM_PUB_KEY"),
 	}
 
 	resSSH, err = vultrClient.SSHKey.Create(context.Background(), sshkey)
@@ -33,13 +22,15 @@ func CreateSSH(vultrClient *govultr.Client, i Input) (resSSH *govultr.SSHKey, er
 	return resSSH, nil
 }
 
-func CreatePrivateNetwork(vultrClient *govultr.Client, i Input) (resNetwork *govultr.Network, err error) {
+func CreatePrivateNetwork(vultrClient *govultr.Client, i Infra) (resNetwork *govultr.Network, err error) {
+	//convert env variable to int
+	num, _ := strconv.Atoi(os.Getenv("WTM_SUBNET_MASK"))
 
 	privateNetwork := &govultr.NetworkReq{
 		Region:       i.Region,
-		Description:  i.NetworkDescription,
-		V4Subnet:     i.NetworkSubnet,
-		V4SubnetMask: i.NetworkSubnetMask,
+		Description:  i.Network.Description,
+		V4Subnet:     os.Getenv("WTM_SUBNET"),
+		V4SubnetMask: num,
 	}
 
 	resNetwork, err = vultrClient.Network.Create(context.Background(), privateNetwork)
@@ -50,17 +41,18 @@ func CreatePrivateNetwork(vultrClient *govultr.Client, i Input) (resNetwork *gov
 	return resNetwork, nil
 }
 
-func CreateInstance(vultrClient *govultr.Client, i Input, networkID, sshID string) (resNetwork *govultr.Instance, err error) {
+func CreateInstance(vultrClient *govultr.Client, i Infra, networkID, sshID string) (resInstance *govultr.Instance, err error) {
 	instanceOptions := &govultr.InstanceCreateReq{
-		Label:                i.InstanceLabel,
-		Hostname:             i.InstanceHostname,
+		Label:                i.Instance.Label,
+		Hostname:             i.Instance.Hostname,
 		Region:               i.Region,
-		Plan:                 i.InstancePlan,
-		OsID:                 i.InstanceOSId,
+		Plan:                 i.Instance.Plan,
+		OsID:                 i.Instance.OSId,
 		AttachPrivateNetwork: []string{networkID},
 		SSHKeys:              []string{sshID},
+		Tag:                  i.Instance.Tag,
 	}
-	resInstance, err := vultrClient.Instance.Create(context.Background(), instanceOptions)
+	resInstance, err = vultrClient.Instance.Create(context.Background(), instanceOptions)
 
 	if err != nil {
 		return nil, fmt.Errorf("error with vultr API: %v", err)
