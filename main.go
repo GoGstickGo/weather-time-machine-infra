@@ -5,16 +5,12 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 	"weathertimemachineinfra/methods"
 
 	"github.com/vultr/govultr/v2"
 	"golang.org/x/oauth2"
 )
-
-type returnID struct {
-	ssh     string
-	network string
-}
 
 func main() {
 	apiKey := os.Getenv("VULTR_APIKEY")
@@ -34,9 +30,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var id returnID
 	if i.Method == "1" {
-		_, checkSSH, err := methods.ListSSHkey(vultrClient)
+		//ssh creation
+		checkSSHID, checkSSH, err := methods.ListSSHkey(vultrClient)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -46,15 +42,13 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
-			id = returnID{
-				ssh: ssh.ID,
-			}
 			fmt.Printf("SSH key was created at %s, ID: %s, Name: %s.\n", ssh.DateCreated, ssh.ID, ssh.Name)
 		} else {
 			fmt.Printf("There is already a key named: %s. Please choose another name for new SSH key. \n", i.SSH.Name)
 			fmt.Print("Continue to Private Network.....\n")
 		}
-		_, checkNetwork, checkNetworkSubnetMask, err := methods.ListPrivateNetwork(vultrClient)
+		//network creation
+		checkNetworkID, checkNetwork, checkNetworkSubnetMask, err := methods.ListPrivateNetwork(vultrClient)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -63,19 +57,29 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
-			id = returnID{
-				network: network.NetworkID,
-			}
 			fmt.Printf("Private network was created at %s, ID: %s, Network Description: %s. Range: %s/%d. \n", network.DateCreated, network.NetworkID, network.Description, network.V4Subnet, network.V4SubnetMask)
 		} else {
 			fmt.Printf("There is already a Private Network with the same subnet: %s/%d. Please choose another subnet for new Private network. \n", checkNetwork, checkNetworkSubnetMask)
+			fmt.Print("Continue to Instance.....\n")
 		}
-
-		instance, err := methods.CreateInstance(vultrClient, i, id.ssh, id.network)
+		//instance creation
+		_, checkInstanceTag, err := methods.ListInstance(vultrClient)
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Printf("Instance was created at %s , Hostname: %s , OS: %s", instance.DateCreated, instance.Label, instance.Os)
+		time.Sleep(10 * time.Second)
+		if len(checkNetworkID) == 0 || len(checkSSHID) == 0 {
+			fmt.Println("Insntance can't be created without SSH and/or Private network")
+		} else if checkInstanceTag == i.Instance.Tag {
+			fmt.Println("There is already instance with same tag. Please choose another tag for the new instance")
+		} else {
+			fmt.Println("Creating Instance...")
+			instance, err := methods.CreateInstance(vultrClient, i, checkNetworkID, checkSSHID)
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Printf("Instance was created at %s , Hostname: %s , OS: %s", instance.DateCreated, instance.Label, instance.Os)
+		}
 
 	}
 	if i.Method == "2" {
@@ -100,22 +104,28 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		instanceID, instanceTag, err := methods.ListInstance(vultrClient)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		subnetMask := fmt.Sprintf("%d", networkSubnetMask)
 		if len(networkSubnet) == 0 {
 			fmt.Print("There is no Private Network to delete.\n")
 		} else if networkSubnet != os.Getenv("WTM_SUBNET") && subnetMask != os.Getenv("WTM_SUBNET_MASK") {
 			log.Fatalf("PrivateNetwork mismatch, existing PrivateNetwork: %s,proposed PrivateNetwork for deletion: %s.\n", networkSubnet, os.Getenv("WTM_SUBNET"))
 		} else {
+			err = methods.DetachNetwork(vultrClient, instanceID, networkID)
+			if err != nil {
+				log.Fatal(err)
+			}
 			err = methods.DeletePrivateNetwork(vultrClient, networkID)
 			if err != nil {
 				log.Fatal(err)
 			}
 			fmt.Printf("Private Network deleted, ID: %s, Subnet: %s\n", networkID, networkSubnet)
 		}
-		instanceID, instanceTag, err := methods.ListInstance(vultrClient)
-		if err != nil {
-			log.Fatal(err)
-		}
+
 		if len(instanceTag) == 0 {
 			log.Fatalf("There is no Instance with the define tag: %s", instanceTag)
 		} else if instanceTag != i.Instance.Tag {
@@ -125,7 +135,7 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
-			fmt.Printf("Instance deleted, ID: %s ,Tag %s\n", instanceID, instanceTag)
+			fmt.Printf("Instance deleted, ID: %s ,Tag: %s\n", instanceID, instanceTag)
 		}
 
 	}

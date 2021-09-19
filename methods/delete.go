@@ -30,3 +30,11 @@ func DeleteInstance(vultrClient *govultr.Client, instanceID string) (err error) 
 	}
 	return err
 }
+
+func DetachNetwork(vultrClient *govultr.Client, instanceID, networkID string) (err error) {
+	err = vultrClient.Instance.DetachPrivateNetwork(context.Background(), instanceID, networkID)
+	if err != nil {
+		return fmt.Errorf("error with vultrAPI (DetachPN): %v ", err)
+	}
+	return err
+}
