@@ -15,6 +15,8 @@ type vultReturn struct {
 	networkSubnetMask int
 	instanceID        string
 	instanceTag       string
+	clusterID         string
+	clusterLabel      string
 }
 
 func ListSSHkey(vultrClient *govultr.Client) (id, name string, err error) {
@@ -62,4 +64,19 @@ func ListInstance(vultrClient *govultr.Client) (instanceID, instanceTag string, 
 		}
 	}
 	return instanceList.instanceID, instanceList.instanceTag, nil
+}
+
+func ListKubernetes(vultrClient *govultr.Client) (clusterID, clusterLabel string, err error) {
+	clusters, _, err := vultrClient.Kubernetes.ListClusters(context.Background(), &govultr.ListOptions{PerPage: 1})
+	if err != nil {
+		return "", "", fmt.Errorf("error with vultr API(Lk8s): %v", err)
+	}
+	var clusterList vultReturn
+	for _, v := range clusters {
+		clusterList = vultReturn{
+			clusterID:    v.ID,
+			clusterLabel: v.Label,
+		}
+	}
+	return clusterList.clusterID, clusterList.clusterLabel, nil
 }

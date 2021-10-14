@@ -11,3 +11,7 @@ Instance:
   Hostname:  "wtm-01"
   OSId: 445
   Tag: "first"
+Kubernetes:
+  Label: "wtm-01"
+  Region: "ewr"
+  Version:

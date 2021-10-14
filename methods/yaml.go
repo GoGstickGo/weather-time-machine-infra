@@ -4,14 +4,16 @@ import (
 	"fmt"
 
 	"github.com/spf13/viper"
+	"github.com/vultr/govultr/v2"
 )
 
 type Infra struct {
-	Method   string
-	Region   string
-	Network  NetworkConf
-	Instance InstanceConf
-	SSH      SSHConf
+	Method     string
+	Region     string
+	Network    NetworkConf
+	Instance   InstanceConf
+	SSH        SSHConf
+	Kubernetes VKEConf
 }
 
 type InstanceConf struct {
@@ -28,6 +30,18 @@ type NetworkConf struct {
 
 type SSHConf struct {
 	Name string
+}
+
+type VKEConf struct {
+	Label    string
+	Region   string
+	Version  string
+	NodePool []govultr.NodePoolReq
+}
+type NodePoolReq struct {
+	NodeQuantity int
+	Label        string
+	Plan         string
 }
 
 func ReadYaml(yamlFile string) (conf Infra, err error) {
