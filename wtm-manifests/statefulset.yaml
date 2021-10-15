@@ -69,14 +69,22 @@ spec:
           name: client
         readinessProbe:
           exec:
-            command: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "postgres" ]
-          initialDelaySeconds: 15
-          timeoutSeconds: 2
+            command: 
+            - bash 
+            - "-c"
+            - |
+              pg_isready -U $POSTGRES_USER -h 127.0.0.1 -p 5432
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
         livenessProbe:
           exec:
-            command: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "postgres" ]
+            command:
+            - bash 
+            - "-c"
+            - |
+              pg_isready -U $POSTGRES_USER -h 127.0.0.1 -p 5432
           initialDelaySeconds: 45
-          timeoutSeconds: 2
+          timeoutSeconds: 5
         imagePullPolicy: Always
         volumeMounts:
         - name: postgres-data
