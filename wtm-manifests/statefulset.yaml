@@ -17,15 +17,6 @@ spec:
       labels:
         app.kubernetes.io/name: postgresql-wtm
     spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: kubernetes.io/hostname
-                operator: In
-                values:
-                - wtm-01-3e59fad0840a
       containers:
       - name: postgresql-wtm
         image: postgres:12.7-alpine
