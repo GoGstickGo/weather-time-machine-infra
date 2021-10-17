@@ -1,0 +1,67 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-wtm
+  namespace: wtm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: wtm
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: wtm
+    spec:
+      containers:
+      - name: wtm
+        image: gadmin/wtm:latest
+        env:
+          - name: DATABASE_USER
+            valueFrom:
+              secretKeyRef:
+                name: app-db-user
+                key: user
+          - name: DATABASE_NAME
+            valueFrom:
+              secretKeyRef:
+                name: app-db-name
+                key: name
+          - name: DATABASE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: app-db-pass
+                key: password
+          - name: DATABASE_URL
+            valueFrom:
+              secretKeyRef:
+                name: app-db-url
+                key: address 
+          - name: DATABASE_PORT
+            value: "5432"
+          - name: RAPIDAPI_KEY
+            valueFrom:
+              secretKeyRef:
+                name: app-api-key
+                key: apikey
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "250m"
+        ports:
+        - name: wtm-port
+          containerPort: 3000
+        readinessProbe:
+          httpGet:
+            path: /city
+            port: wtm-port
+          failureThreshold: 1
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /city
+            port: wtm-port
+          failureThreshold: 2
+          periodSeconds: 30
+        imagePullPolicy: Always
