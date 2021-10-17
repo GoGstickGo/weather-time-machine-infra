@@ -14,3 +14,17 @@ spec:
       name: internal
   selector:
     app.kubernetes.io/name: postgresql-wtm
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-lb-wtm
+  namespace: wtm
+spec:
+  selector:
+    app.kubernetes.io/name: wtm
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
