@@ -80,7 +80,6 @@ func main() {
 			}
 			fmt.Printf("Instance was created at %s , Hostname: %s , OS: %s", instance.DateCreated, instance.Label, instance.Os)
 		}
-
 	}
 	if i.Method == "2" {
 		sshID, sSHName, err := methods.ListSSHkey(vultrClient)
@@ -137,6 +136,5 @@ func main() {
 			}
 			fmt.Printf("Instance deleted, ID: %s ,Tag: %s\n", instanceID, instanceTag)
 		}
-
 	}
 }

@@ -59,3 +59,21 @@ func CreateInstance(vultrClient *govultr.Client, i Infra, networkID, sshID strin
 	}
 	return resInstance, nil
 }
+
+func CreateVKE(vultrClient *govultr.Client, i Infra) (vkeCluster *govultr.Cluster, err error) {
+	clusterOptions := &govultr.ClusterReq{
+		Label:     i.Kubernetes.Label,
+		Version:   i.Kubernetes.Version,
+		Region:    i.Kubernetes.Region,
+		NodePools: i.Kubernetes.NodePool,
+		//, fields{mapping: Mapping{tempField: testSliceCity3}
+	}
+
+	vkeCluster, err = vultrClient.Kubernetes.CreateCluster(context.Background(), clusterOptions)
+	if err != nil {
+		return nil, fmt.Errorf("error with vultr API: %v", err)
+	}
+
+	return vkeCluster, nil
+
+}

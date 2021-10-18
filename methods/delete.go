@@ -38,3 +38,11 @@ func DetachNetwork(vultrClient *govultr.Client, instanceID, networkID string) (e
 	}
 	return err
 }
+
+func DeleteCluster(vultrClient *govultr.Client, clusterID string) (err error) {
+	err = vultrClient.Kubernetes.DeleteCluster(context.Background(), clusterID)
+	if err != nil {
+		return fmt.Errorf("error with vultrAPI (DeleteK8s): %v ", err)
+	}
+	return err
+}
