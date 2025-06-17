@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/spf13/viper v1.8.1
-	github.com/vultr/govultr/v2 v2.8.0
+	github.com/vultr/govultr/v2 v2.17.2
 	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f
 )
 
@@ -13,7 +13,7 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.1 // indirect
-	github.com/hashicorp/go-retryablehttp v0.7.0 // indirect
+	github.com/hashicorp/go-retryablehttp v0.7.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
