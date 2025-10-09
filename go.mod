@@ -1,11 +1,11 @@
 module weathertimemachineinfra
 
-go 1.23.0
+go 1.24.0
 
 require (
 	github.com/spf13/viper v1.20.1
 	github.com/vultr/govultr/v2 v2.17.2
-	golang.org/x/oauth2 v0.30.0
+	golang.org/x/oauth2 v0.32.0
 )
 
 require (
